@@ -5,6 +5,17 @@ const cors = require('cors');
 
 app.use(cors());
 
+const { MongoClient } = require('mongodb');
+// or as an es module:
+// import { MongoClient } from 'mongodb'
+
+// Connection URL ERvq4uoMMR8GmYCD
+const url = "mongodb://orb7410:ERvq4uoMMR8GmYCD@school-cluster.tjyzrz8.mongodb.net/?retryWrites=true&w=majority&appName=School-Cluster&directConnection=true";
+const client = new MongoClient(url);
+
+// Database Name
+const dbName = 'aqyanoosDB';
+
 const data = [
   {
       id: 1,
@@ -49,19 +60,31 @@ const data = [
   }
 ]
 
+const dbConnect = async ()=> {
+  // Use connect method to connect to the server
+  await client.connect();
+  console.log('Connected successfully to server');
+  const db = client.db(dbName);
+  const collection = db.collection('jewlery');
+  return collection;
+}
+
 app.get('/', (req, res) => {
   res.send('hey uri/!')
 })
 
-app.get('/products', (req, res) => {
-  res.send(data)
+app.get('/products', async (req, res) => {
+  const collection = dbConnect();
+  const allJewleries = await collection.find({}).toArray()
+  res.send(allJewleries);
   // res.send([{name: 'or"s earrings'}])
 })
 
-app.get('/product-details/:id', (req, res) => {
+app.get('/product-details/:id',async (req, res) => {
   const params = req.params
-  const product = data.find(item => item.id === parseInt(params.id));
-  res.send(product)
+  const collection = dbConnect();
+  const allJewleries = await collection.find({id:parseInt(params.id)}).toArray()
+  res.send(allJewleries);
 })
 
 app.listen(port, () => {
